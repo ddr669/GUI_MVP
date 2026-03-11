@@ -15,10 +15,8 @@ class Ball:
             self.color = (255,255,255)
 
     def draw(self, screen):
-        new_surf = pg.Surface((screen.get_size()),pg.SRCALPHA)
-        new_surf.fill((255,255,255,0))
-        pg.draw.circle(new_surf, self.color, self.pos, 20)
-        return new_surf
+        pg.draw.circle(screen, self.color, self.pos, 20)
+
 
 pg.font.init()
 def get_font(size: int = 18, *args, **kwargs)->pg.font.Font:
@@ -96,7 +94,7 @@ class Main_Screen(classBase.Base):
         self.size = (self.width, self.height)
         self.screen = pg.display.set_mode(self.size, pg.SRCALPHA)
         self.clock  = pg.time.Clock()
-        self.action: dict[str, [dict[str, tuple]]] = {}
+        self.action: dict[str, dict[str, tuple]] = {}
         self.running = True
         self.cascade = Cascade(color=(65,65,65), font_color=(255,255,255))
         self.objects = []
@@ -116,8 +114,11 @@ class Main_Screen(classBase.Base):
             self.screen.fill(self.bg_color)
             
             if len(self.objects) > 0:
+                new_surf = pg.Surface(self.size, pg.SRCALPHA)
+                new_surf.fill((0,0,0,0))
                 for _ in range(0, len(self.objects)):
-                    self.screen.blit(self.objects[_].draw(self.screen), (0,0))
+                    self.objects[_].draw(new_surf)
+                self.screen.blit(new_surf, (0,0))
             if len(self.action):
                 self.exec_action()
             if self.cascade.on:
