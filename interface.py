@@ -27,7 +27,7 @@ def get_font(size: int = 18, *args, **kwargs)->pg.font.Font:
 def create_ball(game: classBase.Base, kwargs: dict):
     game.objects.append(Ball(kwargs['pos'], kwargs['color']))
 
-def controll_controll(game: classBase.Base,event: pg.Event):
+def controll_controll(game: classBase.Base,event: pg.event.Event):
     for ev in event:
         if ev.type == pg.MOUSEBUTTONUP:
             pos = (ev.pos[0]-5, ev.pos[1]-5)
