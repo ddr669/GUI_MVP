@@ -32,13 +32,21 @@ class Base:
         return (self.width, self.height)
 
 class CascadeBase:
-    def __init__(self, *args, **kwargs):
+    def __init__(self, game: Base = None, *args, **kwargs):
         self.on = False
         self.color = (0,255,0)
         if kwargs.get('color'):
             self.color = kwargs.get("color")
         self.surf = None
         self.pos = (0,0)
+        self.cascade_options = []
+        self.font = None
+        self.font_color = (0,0,255)
+        self.font_offset = 0.5
+        self.offset = 0.5
+        
+
+
 
 
 def get_coord_from_kwargs(size: tuple | list = None)->tuple[int,int]:
