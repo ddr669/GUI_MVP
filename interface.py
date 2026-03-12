@@ -1,5 +1,4 @@
 import pygame as pg
-#from pygame import font as FONT
 import classBase
 
 class Surface(pg.Surface):
@@ -9,7 +8,13 @@ class Surface(pg.Surface):
         super().__init__(size, pg.SRCALPHA)
 
 class CascadeOption:
-    def __init__(self, text: str = None, color: tuple = None, surf = None, pos: tuple = (0,0)):
+    def __init__(self,
+                 text: str = None,
+                 color: tuple = None,
+                 surf = None,
+                 pos: tuple = (0,0),
+                 *args, **kwargs):
+        
         self.color = color if color else (25,25,25, 25)
         self.is_hover = False
         self.old_color = self.color
@@ -17,7 +22,7 @@ class CascadeOption:
         self.hover_color = (200,25,25, 25)
         self.surf = surf
         self.pos = pos
-    
+        self.rel_pos = kwargs.get("pos") if kwargs.get("pos") else None
 
 class Ball:
     def __init__(self,
@@ -73,7 +78,7 @@ def cascadePopup(game: classBase.Base, kwargs: dict):
     
 
 class Cascade(classBase.CascadeBase):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, game: classBase.Base = None,*args, **kwargs):
         super().__init__(*args, **kwargs) 
         self.options = {'Create Ball': 0,
                         'Remove Ball': 1,
@@ -88,7 +93,6 @@ class Cascade(classBase.CascadeBase):
         self.font_offset = 1
         self.offset = 5
         self.draw_surf()
-
 
     def draw_surf(self):
         lenght = len(self.options.keys())
