@@ -15,7 +15,7 @@ class CascadeOption:
                  pos: tuple = (0,0),
                  *args, **kwargs):
         
-        self.color = color if color else (25,25,25, 25)
+        self.color = color if color else (25,25,25, 85)
         self.is_hover = False
         self.old_color = self.color
         self.text = text
@@ -23,6 +23,11 @@ class CascadeOption:
         self.surf = surf
         self.pos = pos
         self.rel_pos = kwargs.get("pos") if kwargs.get("pos") else None
+
+    def update(self):
+        self.surf = Surface(self.surf.size, self.color)
+        self.surf.fill(self.color)
+
 
 class Ball:
     def __init__(self,
@@ -50,8 +55,8 @@ def create_ball(game: classBase.Base, kwargs: dict):
 def controll_controll(game: classBase.Base,event: pg.event.Event):
     for ev in event:
         if ev.type == pg.MOUSEBUTTONUP:
-            pos = (ev.pos[0]-5, ev.pos[1]-5)
-            if ev.button == 3:   
+            if ev.button == 3:
+                pos = (ev.pos[0]-5, ev.pos[1]-5)
                 game.action['cascadepopup'] = {'pos': pos }
             if ev.button == 1:
                 pass
@@ -80,28 +85,32 @@ def cascadePopup(game: classBase.Base, kwargs: dict):
 class Cascade(classBase.CascadeBase):
     def __init__(self, game: classBase.Base = None,*args, **kwargs):
         super().__init__(*args, **kwargs) 
-        self.options = {'Create Ball': 0,
-                        'Remove Ball': 1,
-                        'Change color': 2,
-                        'Exit': 4}
-        self.font = get_font()
+        self.options = {'create ball': 0,
+                        'remove ball': 1,
+                        'change color': 2,
+                        'exit': 4}
+        self.font = get_font(size=21)
         self.font_color = (0,0,255)
         self.cascade_options = []
         if kwargs.get('font_color'):
             self.font_color = kwargs.get("font_color")
 
-        self.font_offset = 1
-        self.offset = 5
+        self.font_offset = 0
+        self.height_offset = 2
+        self.width_offset = 21
         self.draw_surf()
 
     def draw_surf(self):
-        lenght = len(self.options.keys())
+        #lenght = self.font.size(self.options.keys())[1]
+        lenght = 0 
         grett = 0
         for a in self.options.keys():
-            if len(a) >= grett:
-                grett = len(a)
-        height = (lenght*12) + self.offset
-        width  = (grett * 8) + self.offset
+            lenght += self.font.size(a)[1]
+            if self.font.size(a)[0] >= grett:
+                grett = self.font.size(a)[0]
+        
+        height = (lenght) + self.height_offset
+        width  = grett + self.width_offset
         new_surf = Surface((width, height))
         new_surf.fill(self.color)
         self.create_options(new_surf)
@@ -115,14 +124,14 @@ class Cascade(classBase.CascadeBase):
         actual_pxY = self.font_offset + (self.offset/2 )
         old_pxY = actual_pxY
         for a in self.options.keys():
-            cascade_surf = pg.Surface((new_surf.size[0], pxY+(self.offset/2)), pg.SRCALPHA)
+            cascade_surf = Surface((new_surf.size[0], pxY+(self.offset/2)))
             cascade = CascadeOption(a, None, cascade_surf, (0,actual_pxY))
             cascade_surf.fill(cascade.color)
             txt_img = self.font.render( \
                         a, 
                         True,
                         self.font_color)
-            cascade_surf.blit(txt_img, (self.offset,old_pxY))
+            cascade_surf.blit(txt_img, (self.offset/2,old_pxY))
             self.cascade_options.append(cascade)
             cascade_count += 1
             actual_pxY += pxY
@@ -138,7 +147,7 @@ class Main_Screen(classBase.Base):
         self.clock  = pg.time.Clock()
         self.action: dict[str, dict[str, tuple]] = {}
         self.running = True
-        self.cascade = Cascade(color=(65,65,65), font_color=(255,255,255))
+        self.cascade = Cascade(color=(65,65,65,24), font_color=(255,255,255))
         self.objects = []
 
     def update(self):
@@ -161,18 +170,19 @@ class Main_Screen(classBase.Base):
                 for _ in range(0, len(self.objects)):
                     self.objects[_].draw(new_surf)
                 self.screen.blit(new_surf, (0,0))
-            if len(self.action):
-                self.exec_action()
             if self.cascade.on:
                 if pg.mouse.get_pos()[0] > self.cascade.pos[0]:
                     for a in self.cascade.cascade_options:
                         if pg.mouse.get_pos()[1] < self.size[1] - a.pos[1]:
-                            print("!")
-                            a.old_color = a.color
-                            a.color = a.hover_color 
+                            a.surf.fill(a.hover_color)
                             break
-
                 self.screen.blit(self.cascade.surf, self.cascade.pos)
+
+            if len(self.action):
+                self.exec_action()
+           
+
+                
 
             dt = self.clock.tick(60)
             pg.display.set_caption(str(dt))
